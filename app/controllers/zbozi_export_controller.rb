@@ -11,7 +11,22 @@ class ZboziExportController < Spree::BaseController
     returning '' do |output|
       xml = Builder::XmlMarkup.new(:target => output, :indent => 2) 
       xml.instruct!  :xml, :version => "1.0", :encoding => "UTF-8"
-      xml.urlset( :xmlns => "http://www.sitemaps.org/schemas/sitemap/0.9" )
+      xml.shop do
+        Product.active.each do |product|
+          xml.shopitem do
+            xml.productname product.name
+            xml.description product.description
+            xml.url product_url(product)
+            xml.itemtyp 'new'
+            product.variants.each do |variant|
+              xml.variant do
+                xml.productnameext variant.options_text
+                xml.price variant.price
+              end
+            end
+          end
+        end
+      end
     end
   end
 end
